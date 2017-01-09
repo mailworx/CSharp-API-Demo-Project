@@ -109,7 +109,7 @@
 
 			Console.WriteLine("-------------------------------Import result----------------------");
 			Console.WriteLine(string.Format("    Duplicates: {0}", importResponse.Duplicates));
-			Console.WriteLine(string.Format("    Erros: {0}", importResponse.Errors));
+			Console.WriteLine(string.Format("    Errors: {0}", importResponse.Errors));
 			Console.WriteLine(string.Format("    Imported: {0}", importResponse.Imported));
 			Console.WriteLine(string.Format("    Updated: {0}", importResponse.Updated));
 
