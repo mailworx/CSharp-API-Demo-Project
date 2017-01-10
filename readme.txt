@@ -1,4 +1,4 @@
-﻿This code is provided as is without any waranty in MIT and LGPL License.
+﻿This code is provided as is without any warranty in MIT and LGPL License.
 It just shows how to work with the mailworx API in a C# application.
 For further reading take a look at http://www.mailworx.info/api (german).
 
