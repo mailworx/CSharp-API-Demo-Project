@@ -101,6 +101,9 @@
           <s:extension base="tns:Message">
             <s:sequence>
               <s:element minOccurs="0" maxOccurs="1" name="UsedInForms" type="tns:ArrayOfString" />
+              <s:element minOccurs="0" maxOccurs="1" name="UsedInProfiles" type="tns:ArrayOfString" />
+              <s:element minOccurs="0" maxOccurs="1" name="UsedInTextComponents" type="tns:ArrayOfString" />
+              <s:element minOccurs="0" maxOccurs="1" name="UsedInWorkflows" type="tns:ArrayOfString" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
@@ -234,6 +237,16 @@
       <s:complexType name="CreateCampaignResponse">
         <s:complexContent mixed="false">
           <s:extension base="tns:MailworxMessage" />
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="Affiliation">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:MailworxMessage">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AffiliationId" type="s:string" />
+            </s:sequence>
+          </s:extension>
         </s:complexContent>
       </s:complexType>
       <s:complexType name="Field" abstract="true">
@@ -374,6 +387,43 @@
             </s:sequence>
           </s:extension>
         </s:complexContent>
+      </s:complexType>
+      <s:complexType name="CentralSection">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:Section">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="CentralSectionName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CatchPhrase" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="ValidFrom" type="s:dateTime" />
+              <s:element minOccurs="1" maxOccurs="1" name="ValidTo" nillable="true" type="s:dateTime" />
+              <s:element minOccurs="1" maxOccurs="1" name="Status" type="tns:CentralSectionStatus" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:simpleType name="CentralSectionStatus">
+        <s:restriction base="s:string">
+          <s:enumeration value="Online" />
+          <s:enumeration value="Draft" />
+          <s:enumeration value="Archive" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="AffiliationCentralSection">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:CentralSection">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="TopNews" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="Affiliation" type="tns:ArrayOfAffiliation" />
+              <s:element minOccurs="0" maxOccurs="1" name="BranchOfficial" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="SectionOfficial" type="s:boolean" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfAffiliation">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Affiliation" nillable="true" type="tns:Affiliation" />
+        </s:sequence>
       </s:complexType>
       <s:simpleType name="WorkflowState">
         <s:restriction base="s:string">
@@ -794,10 +844,12 @@
               <s:element minOccurs="0" maxOccurs="1" name="IPAddress" type="s:string" />
               <s:element minOccurs="1" maxOccurs="1" name="Mailformat" nillable="true" type="tns:Mailformat" />
               <s:element minOccurs="1" maxOccurs="1" name="RegistrationDate" nillable="true" type="s:dateTime" />
+              <s:element minOccurs="0" maxOccurs="1" name="DOIStatus" nillable="true" type="tns:DOIStatus" />
               <s:element minOccurs="1" maxOccurs="1" name="LastChanged" nillable="true" type="s:dateTime" />
               <s:element minOccurs="0" maxOccurs="1" name="ValuesChangedAt" nillable="true" type="s:dateTime" />
               <s:element minOccurs="1" maxOccurs="1" name="LastSynchronized" nillable="true" type="s:dateTime" />
               <s:element minOccurs="0" maxOccurs="1" name="Fields" type="tns:ArrayOfField" />
+              <s:element minOccurs="0" maxOccurs="1" name="TrackSubscriberActivity" nillable="true" type="s:boolean" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
@@ -817,6 +869,16 @@
           <s:enumeration value="Multipart" />
         </s:restriction>
       </s:simpleType>
+      <s:simpleType name="DOIStatus">
+        <s:restriction base="s:string">
+          <s:enumeration value="Unknown" />
+          <s:enumeration value="DocumentedExternally" />
+          <s:enumeration value="DoubleOptInInitiated" />
+          <s:enumeration value="DoubleOptInCampaignSent" />
+          <s:enumeration value="DoubleOptInConfirmed" />
+          <s:enumeration value="DoubleOptInRevoked" />
+        </s:restriction>
+      </s:simpleType>
       <s:element name="ExportSubscribersResponse">
         <s:complexType>
           <s:sequence>
@@ -829,6 +891,61 @@
           <s:extension base="tns:Message">
             <s:sequence>
               <s:element minOccurs="0" maxOccurs="1" name="Subscribers" type="tns:ArrayOfSubscriber" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="ExportSubscribersWithFormFields">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:SubscriberExportWithFormFieldsRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SubscriberExportWithFormFieldsRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:SubscriberExportRequest">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="FormGuids" type="tns:ArrayOfGuid" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="FormFieldValue">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="FormId" type="s1:guid" />
+          <s:element minOccurs="0" maxOccurs="1" name="Values" type="tns:ArrayOfSubscriberFormFieldValue" />
+          <s:element minOccurs="0" maxOccurs="1" name="FieldNames" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSubscriberFormFieldValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SubscriberFormFieldValue" nillable="true" type="tns:SubscriberFormFieldValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SubscriberFormFieldValue">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="SubscriberId" type="s1:guid" />
+          <s:element minOccurs="0" maxOccurs="1" name="FormValues" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfFormFieldValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="FormFieldValue" nillable="true" type="tns:FormFieldValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ExportSubscribersWithFormFieldsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ExportSubscribersWithFormFieldsResult" type="tns:SubscriberExportWithFormFieldsResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SubscriberExportWithFormFieldsResponse">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:SubscriberExportResponse">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="FormFieldValues" type="tns:ArrayOfFormFieldValue" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
@@ -1057,6 +1174,44 @@
           <s:extension base="tns:MailworxMessage">
             <s:sequence>
               <s:element minOccurs="0" maxOccurs="1" name="Sections" type="tns:ArrayOfSection" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetCentralSectionsOfDirectory">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:GetCentralSectionsOfDirectoryRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetCentralSectionsOfDirectoryRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:SecureRequestMessage">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Path" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="StatusOfCentralSections" nillable="true" type="tns:CentralSectionStatus" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="ArrayOfCentralSection">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="CentralSection" nillable="true" type="tns:CentralSection" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetCentralSectionsOfDirectoryResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetCentralSectionsOfDirectoryResult" type="tns:GetCentralSectionsOfDirectoryResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetCentralSectionsOfDirectoryResponse">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:MailworxMessage">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Sections" type="tns:ArrayOfCentralSection" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
@@ -1533,6 +1688,7 @@
         <s:restriction base="s:string">
           <s:enumeration value="MailGenerated" />
           <s:enumeration value="MailSent" />
+          <s:enumeration value="MailInserted" />
         </s:restriction>
       </s:simpleType>
       <s:element name="GetSendActionInProgressResponse">
@@ -2063,6 +2219,7 @@
               <s:element minOccurs="1" maxOccurs="1" name="OptOutDate" nillable="true" type="s:dateTime" />
               <s:element minOccurs="0" maxOccurs="1" name="IPAddress" type="s:string" />
               <s:element minOccurs="1" maxOccurs="1" name="Mailformat" nillable="true" type="tns:Mailformat" />
+              <s:element minOccurs="0" maxOccurs="1" name="DOIStatus" nillable="true" type="tns:DOIStatus" />
               <s:element minOccurs="1" maxOccurs="1" name="RegistrationDate" nillable="true" type="s:dateTime" />
               <s:element minOccurs="1" maxOccurs="1" name="LastChanged" nillable="true" type="s:dateTime" />
               <s:element minOccurs="1" maxOccurs="1" name="LastSynchronized" nillable="true" type="s:dateTime" />
@@ -2074,6 +2231,7 @@
               <s:element minOccurs="0" maxOccurs="1" name="GuidFields" type="tns:ArrayOfGuidField" />
               <s:element minOccurs="0" maxOccurs="1" name="MdbFields" type="tns:ArrayOfMdbField" />
               <s:element minOccurs="0" maxOccurs="1" name="UrlFields" type="tns:ArrayOfUrlField" />
+              <s:element minOccurs="0" maxOccurs="1" name="TrackSubscriberActivity" nillable="true" type="s:boolean" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
@@ -2199,11 +2357,13 @@
               <s:element minOccurs="1" maxOccurs="1" name="CampaignId" type="s1:guid" />
               <s:element minOccurs="1" maxOccurs="1" name="UseIRated" type="s:boolean" />
               <s:element minOccurs="1" maxOccurs="1" name="IgnoreCulture" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="IgnoreRules" type="s:boolean" />
               <s:element minOccurs="1" maxOccurs="1" name="UseRTR" type="s:boolean" />
               <s:element minOccurs="1" maxOccurs="1" name="SenderUserId" nillable="true" type="s1:guid" />
               <s:element minOccurs="1" maxOccurs="1" name="SendType" type="tns:CampaignSendType" />
               <s:element minOccurs="0" maxOccurs="1" name="Settings" type="tns:SendSettings" />
               <s:element minOccurs="0" maxOccurs="1" name="StopSendToDuplicates" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="ExcludeSubscribersWithoutConsent" type="tns:ExcludeSubscribersWithoutConsent" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
@@ -2268,6 +2428,17 @@
           </s:extension>
         </s:complexContent>
       </s:complexType>
+      <s:simpleType name="ExcludeSubscribersWithoutConsent">
+        <s:list>
+          <s:simpleType>
+            <s:restriction base="s:string">
+              <s:enumeration value="ExcludeUnknownSubscribers" />
+              <s:enumeration value="ExcludeRevokedSubscribers" />
+              <s:enumeration value="ExcludeSubscribersWithConsentInProgress" />
+            </s:restriction>
+          </s:simpleType>
+        </s:list>
+      </s:simpleType>
       <s:element name="SendCampaignResponse">
         <s:complexType>
           <s:sequence>
@@ -2583,6 +2754,10 @@
               <s:element minOccurs="0" maxOccurs="1" name="NotificationAddress" type="s:string" />
               <s:element minOccurs="1" maxOccurs="1" name="NotificationLanguage" type="tns:EventNotificationLanguage" />
               <s:element minOccurs="1" maxOccurs="1" name="State" type="tns:EventState" />
+              <s:element minOccurs="0" maxOccurs="1" name="Creator" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="RegistrationOpened" nillable="true" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="RegistrationClosedFrom" nillable="true" type="s:dateTime" />
+              <s:element minOccurs="0" maxOccurs="1" name="ClosedRegistrationText" type="s:string" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
@@ -2805,6 +2980,11 @@
               <s:element minOccurs="1" maxOccurs="1" name="CampaignId" type="s1:guid" />
               <s:element minOccurs="0" maxOccurs="1" name="TriggerMails" type="tns:ArrayOfTriggerMail" />
               <s:element minOccurs="0" maxOccurs="1" name="TriggerMailIds" type="tns:ArrayOfLong" />
+              <s:element minOccurs="0" maxOccurs="1" name="UseIRated" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="IgnoreCulture" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="UseRTR" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="ConsiderSubscriberExclusionCriterias" type="s:boolean" />
+              <s:element minOccurs="0" maxOccurs="1" name="ConsiderDOIStatus" type="s:boolean" />
             </s:sequence>
           </s:extension>
         </s:complexContent>
@@ -3069,6 +3249,70 @@
           </s:extension>
         </s:complexContent>
       </s:complexType>
+      <s:element name="GetSubscriberIdByMailCode">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:GetSubscriberIdByMailCodeRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetSubscriberIdByMailCodeRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:SecureRequestMessage">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="MailCode" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetSubscriberIdByMailCodeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetSubscriberIdByMailCodeResult" type="tns:GetSubscriberIdByMailCodeResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetSubscriberIdByMailCodeResponse">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:Message">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="SubscriberId" nillable="true" type="s1:guid" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetSubscriberByMailCode">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:GetSubscriberByMailCodeRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetSubscriberByMailCodeRequest">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:SecureRequestMessage">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="MailCode" type="s:string" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="GetSubscriberByMailCodeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetSubscriberByMailCodeResult" type="tns:GetSubscriberByMailCodeResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetSubscriberByMailCodeResponse">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:Message">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="Subscriber" type="tns:Subscriber" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
     </s:schema>
     <s:schema elementFormDefault="qualified" targetNamespace="http://microsoft.com/wsdl/types/">
       <s:simpleType name="guid">
@@ -3174,6 +3418,12 @@
   <wsdl:message name="ExportSubscribersSoapOut">
     <wsdl:part name="parameters" element="tns:ExportSubscribersResponse" />
   </wsdl:message>
+  <wsdl:message name="ExportSubscribersWithFormFieldsSoapIn">
+    <wsdl:part name="parameters" element="tns:ExportSubscribersWithFormFields" />
+  </wsdl:message>
+  <wsdl:message name="ExportSubscribersWithFormFieldsSoapOut">
+    <wsdl:part name="parameters" element="tns:ExportSubscribersWithFormFieldsResponse" />
+  </wsdl:message>
   <wsdl:message name="GetAccountsSoapIn">
     <wsdl:part name="parameters" element="tns:GetAccounts" />
   </wsdl:message>
@@ -3203,6 +3453,12 @@
   </wsdl:message>
   <wsdl:message name="GetCentralSectionsSoapOut">
     <wsdl:part name="parameters" element="tns:GetCentralSectionsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetCentralSectionsOfDirectorySoapIn">
+    <wsdl:part name="parameters" element="tns:GetCentralSectionsOfDirectory" />
+  </wsdl:message>
+  <wsdl:message name="GetCentralSectionsOfDirectorySoapOut">
+    <wsdl:part name="parameters" element="tns:GetCentralSectionsOfDirectoryResponse" />
   </wsdl:message>
   <wsdl:message name="GetClickRatesOfCampaignSoapIn">
     <wsdl:part name="parameters" element="tns:GetClickRatesOfCampaign" />
@@ -3456,6 +3712,18 @@
   <wsdl:message name="ResetBouncesOfSubscribersSoapOut">
     <wsdl:part name="parameters" element="tns:ResetBouncesOfSubscribersResponse" />
   </wsdl:message>
+  <wsdl:message name="GetSubscriberIdByMailCodeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetSubscriberIdByMailCode" />
+  </wsdl:message>
+  <wsdl:message name="GetSubscriberIdByMailCodeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetSubscriberIdByMailCodeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetSubscriberByMailCodeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetSubscriberByMailCode" />
+  </wsdl:message>
+  <wsdl:message name="GetSubscriberByMailCodeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetSubscriberByMailCodeResponse" />
+  </wsdl:message>
   <wsdl:portType name="MailworxWebServiceAgentSoap">
     <wsdl:operation name="AreCampaignsInWork">
       <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Use this method to detect if the given campaigns are in work.</wsdl:documentation>
@@ -3537,6 +3805,11 @@
       <wsdl:input message="tns:ExportSubscribersSoapIn" />
       <wsdl:output message="tns:ExportSubscribersSoapOut" />
     </wsdl:operation>
+    <wsdl:operation name="ExportSubscribersWithFormFields">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Use this method for getting the subscribers with form fields from the mailworx system.</wsdl:documentation>
+      <wsdl:input message="tns:ExportSubscribersWithFormFieldsSoapIn" />
+      <wsdl:output message="tns:ExportSubscribersWithFormFieldsSoapOut" />
+    </wsdl:operation>
     <wsdl:operation name="GetAccounts">
       <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">This method returns the accounts the logged in user has access to</wsdl:documentation>
       <wsdl:input message="tns:GetAccountsSoapIn" />
@@ -3561,6 +3834,11 @@
       <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Use this method to get all central sections of a given template.</wsdl:documentation>
       <wsdl:input message="tns:GetCentralSectionsSoapIn" />
       <wsdl:output message="tns:GetCentralSectionsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCentralSectionsOfDirectory">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Use this method to get all central sections of a given directory. The path to the directory has to be seperated with a forward slash.</wsdl:documentation>
+      <wsdl:input message="tns:GetCentralSectionsOfDirectorySoapIn" />
+      <wsdl:output message="tns:GetCentralSectionsOfDirectorySoapOut" />
     </wsdl:operation>
     <wsdl:operation name="GetClickRatesOfCampaign">
       <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">This method returns the url and the amount of clicks of the requested campaign</wsdl:documentation>
@@ -3772,6 +4050,16 @@
       <wsdl:input message="tns:ResetBouncesOfSubscribersSoapIn" />
       <wsdl:output message="tns:ResetBouncesOfSubscribersSoapOut" />
     </wsdl:operation>
+    <wsdl:operation name="GetSubscriberIdByMailCode">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Use this method to get the id of the subcriber who received the mail with the given code.</wsdl:documentation>
+      <wsdl:input message="tns:GetSubscriberIdByMailCodeSoapIn" />
+      <wsdl:output message="tns:GetSubscriberIdByMailCodeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetSubscriberByMailCode">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Use this method to get the data of the subcriber who received the mail with the given code.</wsdl:documentation>
+      <wsdl:input message="tns:GetSubscriberByMailCodeSoapIn" />
+      <wsdl:output message="tns:GetSubscriberByMailCodeSoapOut" />
+    </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="MailworxWebServiceAgentSoap" type="tns:MailworxWebServiceAgentSoap">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
@@ -3919,6 +4207,15 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="ExportSubscribersWithFormFields">
+      <soap:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/ExportSubscribersWithFormFields" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GetAccounts">
       <soap:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetAccounts" style="document" />
       <wsdl:input>
@@ -3957,6 +4254,15 @@
     </wsdl:operation>
     <wsdl:operation name="GetCentralSections">
       <soap:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetCentralSections" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCentralSectionsOfDirectory">
+      <soap:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetCentralSectionsOfDirectory" style="document" />
       <wsdl:input>
         <soap:body use="literal" />
       </wsdl:input>
@@ -4342,6 +4648,24 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="GetSubscriberIdByMailCode">
+      <soap:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetSubscriberIdByMailCode" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSubscriberByMailCode">
+      <soap:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetSubscriberByMailCode" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
   <wsdl:binding name="MailworxWebServiceAgentSoap12" type="tns:MailworxWebServiceAgentSoap">
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
@@ -4489,6 +4813,15 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="ExportSubscribersWithFormFields">
+      <soap12:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/ExportSubscribersWithFormFields" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GetAccounts">
       <soap12:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetAccounts" style="document" />
       <wsdl:input>
@@ -4527,6 +4860,15 @@
     </wsdl:operation>
     <wsdl:operation name="GetCentralSections">
       <soap12:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetCentralSections" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCentralSectionsOfDirectory">
+      <soap12:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetCentralSectionsOfDirectory" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>
@@ -4905,6 +5247,24 @@
     </wsdl:operation>
     <wsdl:operation name="ResetBouncesOfSubscribers">
       <soap12:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/ResetBouncesOfSubscribers" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSubscriberIdByMailCode">
+      <soap12:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetSubscriberIdByMailCode" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSubscriberByMailCode">
+      <soap12:operation soapAction="http://www.mailworx.at/interfaces/serviceagent/GetSubscriberByMailCode" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

@@ -38,10 +38,12 @@ namespace SampleImplementation {
 			// ### GENERAL ###
 
 			// This is the agent which will be used as connection to the mailworx webservice.
-			MailworxWebServiceAgent agent = new MailworxWebServiceAgent();
+			MailworxWebServiceAgent agent = new MailworxWebServiceAgent
+			{
 
-			// The url to the webservice.
-			agent.Url = "http://sys.mailworx.info/services/serviceagent.asmx";
+				// The url to the webservice.
+				Url = "http://sys.mailworx.info/services/serviceagent.asmx"
+			};
 
 			// Set  the login data.
 			SecurityContext context = GetSecurityContext();
