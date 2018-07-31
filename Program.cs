@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using SampleImplementation.mailworxAPI;
 
 namespace SampleImplementation {
-	class Program {
+	static class Program {
 		static void Main(string[] args) {
 
 

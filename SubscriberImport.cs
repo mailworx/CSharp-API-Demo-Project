@@ -171,7 +171,7 @@
 			}
 			catch (Exception ex) {
 				Console.WriteLine(ex.ToString());
-				throw ex;
+				throw;
 			}
 
 
@@ -428,7 +428,7 @@
 			catch (Exception ex) {
 				// A error occured
 				Console.WriteLine(ex.ToString());
-				throw ex;
+				throw;
 			}
 		}
 		#endregion
