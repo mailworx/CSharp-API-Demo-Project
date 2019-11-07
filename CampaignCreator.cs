@@ -20,9 +20,9 @@
 		#region Constructor
 		public CampaignCreator(MailworxWebServiceAgent serviceAgent, SecurityContext securityContext) {
 			if (serviceAgent == null)
-				throw new ArgumentNullException("serviceAgent", "serviceAgent must not be null!");
-			if (serviceAgent == null)
-				throw new ArgumentNullException("securityContext", "securityContext must not be null!");
+				throw new ArgumentNullException(nameof(serviceAgent), "serviceAgent must not be null!");
+			if (securityContext == null)
+				throw new ArgumentNullException(nameof(securityContext), "securityContext must not be null!");
 
 			this.serviceAgent = serviceAgent;
 			this.securityContext = securityContext;
